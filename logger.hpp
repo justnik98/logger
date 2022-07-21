@@ -5,12 +5,13 @@
 #ifndef LOGGER_LOGGER_HPP
 #define LOGGER_LOGGER_HPP
 
-#include "buffer.hpp"
 #include <ctime>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <chrono>
+#include <fstream>
+#include "buffer.hpp"
 
 enum log_lvl {
     ERROR = 0, WARNING, INFO, DEBUG
@@ -29,10 +30,11 @@ private:
 
     static int cur_log_lvl;
     std::ofstream os = std::ofstream("out", std::ios::app);
-    std::ostringstream oss;
+    //std::ostringstream oss;
+    Buffer oss;
 
     static auto timestamp() {
-        auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        auto now = time(NULL);
         return now;
     }
 
@@ -59,11 +61,13 @@ public:
                 oss << "";
         }
         auto now = timestamp();
-        oss << std::put_time(localtime(&now), "%F %T") << ' ';
+        std::stringstream ss;
+        ss <<std::put_time(localtime(&now), "%F %T");
+        oss << ss.str() << ' ';
     }
 
     ~Logger() {
-        os << oss.str();
+        os << oss;
         os << '\n';
     }
 
