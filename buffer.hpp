@@ -59,12 +59,12 @@ inline std::ostream &operator<<(std::ostream &of, Buffer &b) {
     return of;
 }
 
-Buffer &Buffer::operator<<(char value) noexcept {
+inline Buffer &Buffer::operator<<(char value) noexcept {
     buf[size++] = value;
     return *this;
 }
 
-Buffer &Buffer::operator<<(std::string_view value) noexcept {
+inline Buffer &Buffer::operator<<(std::string_view value) noexcept {
     for (auto &&c: value) {
         buf[size++] = c;
     }
