@@ -9,6 +9,7 @@
 #include <array>
 #include <string>
 #include <fmt/format.h>
+#include <fmt/compile.h>
 
 class Buffer {
 private:
@@ -45,13 +46,20 @@ public:
 
     Buffer &operator<<(std::string_view value) noexcept;
 
-//    Buffer& operator<<(float value) noexcept;
-//    Buffer& operator<<(double value) noexcept;
-//    Buffer& operator<<(long double value) noexcept;
-//    Buffer& operator<<(unsigned long long value) noexcept;
-//    Buffer& operator<<(long long value) noexcept;
-//    Buffer& operator<<(bool value) noexcept;
-//    Buffer& operator<<(const std::exception& value) noexcept;
+    Buffer &operator<<(float value) noexcept;
+
+    Buffer &operator<<(double value) noexcept;
+
+    Buffer &operator<<(long double value) noexcept;
+
+    Buffer &operator<<(unsigned long long value) noexcept;
+
+    Buffer &operator<<(long long value) noexcept;
+
+    Buffer &operator<<(bool value) noexcept;
+
+    Buffer &operator<<(const std::exception &value) noexcept;
+
     friend std::ostream &operator<<(std::ostream &of, Buffer &b);
 
     void flush() {
@@ -74,6 +82,47 @@ inline Buffer &Buffer::operator<<(std::string_view value) noexcept {
     for (auto &&c: value) {
         buf[size++] = c;
     }
+    return *this;
+}
+
+inline Buffer &Buffer::operator<<(float value) noexcept {
+    auto str = fmt::format(FMT_COMPILE("{}"), value);
+    *this << str;
+    return *this;
+}
+
+inline Buffer &Buffer::operator<<(double value) noexcept {
+    auto str = fmt::format(FMT_COMPILE("{}"), value);
+    *this << str;
+    return *this;
+}
+
+inline Buffer &Buffer::operator<<(long double value) noexcept {
+    auto str = fmt::format(FMT_COMPILE("{}"), value);
+    *this << str;
+    return *this;
+}
+
+inline Buffer &Buffer::operator<<(unsigned long long int value) noexcept {
+    auto str = fmt::format(FMT_COMPILE("{}"), value);
+    *this << str;
+    return *this;
+}
+
+inline Buffer &Buffer::operator<<(bool value) noexcept {
+    auto str = fmt::format(FMT_COMPILE("{}"), value);
+    *this << str;
+    return *this;
+}
+
+inline Buffer &Buffer::operator<<(long long int value) noexcept {
+    auto str = fmt::format(FMT_COMPILE("{}"), value);
+    *this << str;
+    return *this;
+}
+
+inline Buffer &Buffer::operator<<(const std::exception &value) noexcept {
+    *this << value.what();
     return *this;
 }
 

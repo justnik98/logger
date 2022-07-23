@@ -34,13 +34,12 @@ private:
     static int cur_log_lvl;
     static std::basic_string<char> log_file;
     static uint32_t max_file_size;
-    //std::ofstream os = std::ofstream(log_file, std::ios::app);
-    FILE * os = fopen(log_file.c_str(),"a+");
+    std::ofstream os = std::ofstream(log_file, std::ios::app);
     Buffer oss;
 
     static auto timestamp() {
         auto now = std::chrono::system_clock::now();
-        return fmt::format("{:%Y-%m-%d %H:%M:%S}", now);
+        return fmt::format("{:%Y-%m-%d %H:%M:%S }", now);
     }
 
 public:
@@ -75,12 +74,12 @@ public:
     }
 
     ~Logger() {
-        if (ftell(os) > max_file_size) {
-            fclose(os);
+        if (os.tellp() > max_file_size) {
+            os.close();
             std::remove(log_file.c_str());
-            os = fopen(log_file.c_str(), "a+");
+            os = std::ofstream(log_file, std::ios::app);
         }
-        fprintf(os, "%s\n",oss.data());
+        os << oss << '\n';
     }
 
     template<typename T>
