@@ -25,23 +25,30 @@ enum log_lvl {
 #define LOG_ERROR() \
     if(Logger::get_log_lvl() >= ERROR) Logger(ERROR)
 
+
 class Logger {
 private:
 
     static int cur_log_lvl;
-    std::ofstream os = std::ofstream("out", std::ios::app);
-    //std::ostringstream oss;
+    static std::basic_string<char> log_file;
+    static uint32_t max_file_size;
+    std::ofstream os = std::ofstream(log_file, std::ios::app);
     Buffer oss;
 
     static auto timestamp() {
-        auto now = time(NULL);
+        auto now = time(nullptr);
         return now;
     }
 
 public:
 
     static int get_log_lvl() { return cur_log_lvl; }
-    static int set_log_lvl(int val) {  cur_log_lvl = val; }
+
+    static void set_log_lvl(int val) { cur_log_lvl = val; }
+
+    static void set_log_file(std::string file) { log_file = std::move(file); }
+
+    static void set_log_size(uint32_t val) { max_file_size = val; }
 
     explicit Logger(int lvl) {
         switch (lvl) {
@@ -62,11 +69,16 @@ public:
         }
         auto now = timestamp();
         std::stringstream ss;
-        ss <<std::put_time(localtime(&now), "%F %T");
+        ss << std::put_time(localtime(&now), "%F %T");
         oss << ss.str() << ' ';
     }
 
     ~Logger() {
+        if (os.tellp() > max_file_size) {
+            os.close();
+            std::remove(log_file.c_str());
+            os.open(log_file, std::ios::app);
+        }
         os << oss;
         os << '\n';
     }
@@ -77,5 +89,10 @@ public:
         return *this;
     }
 };
+
+inline int Logger::cur_log_lvl = DEBUG;
+inline std::string Logger::log_file = "out";
+inline uint32_t Logger::max_file_size = 2 << 30;
+
 
 #endif //LOGGER_LOGGER_HPP
