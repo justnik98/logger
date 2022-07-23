@@ -4,13 +4,15 @@
 
 #ifndef LOGGER_BUFFER_HPP
 #define LOGGER_BUFFER_HPP
+#define FMT_HEADER_ONLY
 
 #include <array>
 #include <string>
+#include <fmt/format.h>
 
 class Buffer {
 private:
-    std::array<char, 1024> buf{0};
+    std::array<char, 1024> buf{};
     size_t size = 0;
 public:
     template<typename T>
@@ -36,6 +38,9 @@ public:
         return *this;
     }
 
+    char *data() { return buf.data(); }
+
+
     Buffer &operator<<(char value) noexcept;
 
     Buffer &operator<<(std::string_view value) noexcept;
@@ -48,8 +53,9 @@ public:
 //    Buffer& operator<<(bool value) noexcept;
 //    Buffer& operator<<(const std::exception& value) noexcept;
     friend std::ostream &operator<<(std::ostream &of, Buffer &b);
-    void flush(){
-        buf = std::array<char,1024>{0};
+
+    void flush() {
+        buf = std::array<char, 1024>{0};
     }
 
 };

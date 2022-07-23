@@ -4,6 +4,7 @@
 
 #ifndef LOGGER_LOGGER_HPP
 #define LOGGER_LOGGER_HPP
+#define FMT_HEADER_ONLY
 
 #include <ctime>
 #include <iostream>
@@ -11,6 +12,7 @@
 #include <sstream>
 #include <chrono>
 #include <fstream>
+#include <fmt/chrono.h>
 #include "buffer.hpp"
 
 enum log_lvl {
@@ -32,12 +34,13 @@ private:
     static int cur_log_lvl;
     static std::basic_string<char> log_file;
     static uint32_t max_file_size;
-    std::ofstream os = std::ofstream(log_file, std::ios::app);
+    //std::ofstream os = std::ofstream(log_file, std::ios::app);
+    FILE * os = fopen(log_file.c_str(),"a+");
     Buffer oss;
 
     static auto timestamp() {
-        auto now = time(nullptr);
-        return now;
+        auto now = std::chrono::system_clock::now();
+        return fmt::format("{:%Y-%m-%d %H:%M:%S}", now);
     }
 
 public:
@@ -68,19 +71,16 @@ public:
                 oss << "";
         }
         auto now = timestamp();
-        std::stringstream ss;
-        ss << std::put_time(localtime(&now), "%F %T");
-        oss << ss.str() << ' ';
+        oss << timestamp() << ' ';
     }
 
     ~Logger() {
-        if (os.tellp() > max_file_size) {
-            os.close();
+        if (ftell(os) > max_file_size) {
+            fclose(os);
             std::remove(log_file.c_str());
-            os.open(log_file, std::ios::app);
+            os = fopen(log_file.c_str(), "a+");
         }
-        os << oss;
-        os << '\n';
+        fprintf(os, "%s\n",oss.data());
     }
 
     template<typename T>
