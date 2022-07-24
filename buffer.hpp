@@ -122,7 +122,8 @@ inline Buffer &Buffer::operator<<(long long int value) noexcept {
 }
 
 inline Buffer &Buffer::operator<<(const std::exception &value) noexcept {
-    *this << value.what();
+    auto msg = value.what();
+    *this << msg;
     return *this;
 }
 
